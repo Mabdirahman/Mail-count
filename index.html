@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mailing Tally Tracker</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background: #f4f6f8;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+.section {
+    margin-bottom: 30px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.section h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.location {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+button {
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+.reset-btn {
+    margin-top: 20px;
+    padding: 6px 12px;
+    background: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+.reset-btn:hover {
+    background: #c9302c;
+}
+
+#container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<h2>Mailing Tally Tracker</h2>
+
+<div id="container"></div>
+
+<button class="reset-btn" onclick="resetTally()">Reset All Counts</button>
+
+<script>
+
+// =====================
+// DATA GROUPS
+// =====================
+
+const regularLocations = [
+"Attleboro","Ayer","Brighton","Central Boston","East Boston","South Boston",
+"Barnstable","S. Berkshire","Brockton","Brookline","E. Brookfield","Cambridge",
+"Charlestown","Chelsea","Chicopee","Clinton","Concord","Dedham","Dorchester",
+"Dudley","Edgartown","Fall River","Falmouth","Fitchburg","Framingham","Gardner",
+"Gloucester","Greenfield","Haverhill","Hingham","Holyoke","East Hampshire",
+"Ipswich","Lawrence","Leominster","Lowell","Lynn","Malden","Marlboro","Milford",
+"Nantucket","Natick","New Bedford","Newburyport","Newton","Northamton",
+"North Berkshire","Orange","Orleans","Palmer","Peabody","Pittsfield","Plymouth",
+"Quincy","Roxbury","West Roxbury","Salem","Springfield","Somerville",
+"Stoughton","Taunton","Uxbridge","Waltham","Wareham","Westboro","Westfield",
+"Winchendon","Woburn","Worcester","Wrentham"
+];
+
+const juvenileCourt = [
+"Barnstable","Berkshire","Bristol","Essex",
+"Franklin/Hampshire","Hampden","Middlesex",
+"Norfolk","Plymouth","Suffolk","Worcester"
+];
+
+const superiorCourt = [
+"Barnstable","Berkshire","Bristol","Essex",
+"Franklin","Hampden","Hampshire","Middlesex",
+"Norfolk","Plymouth","Suffolk","Worcester"
+];
+
+// =====================
+// TALLY STORAGE
+// =====================
+
+let tally = JSON.parse(localStorage.getItem("tally")) || {};
+
+function initializeGroup(groupName, locations) {
+    const container = document.getElementById("container");
+
+    const section = document.createElement("div");
+    section.className = "section";
+
+    const title = document.createElement("h3");
+    title.textContent = groupName;
+    section.appendChild(title);
+
+    locations.forEach(loc => {
+
+        const key = groupName + " - " + loc;
+
+        if (!(key in tally)) tally[key] = 0;
+
+        const row = document.createElement("div");
+        row.className = "location";
+
+        const label = document.createElement("span");
+        label.textContent = `${loc} (${tally[key]})`;
+
+        const button = document.createElement("button");
+        button.textContent = "Add";
+        button.onclick = function() {
+            tally[key]++;
+            localStorage.setItem("tally", JSON.stringify(tally));
+            label.textContent = `${loc} (${tally[key]})`;
+        };
+
+        row.appendChild(label);
+        row.appendChild(button);
+        section.appendChild(row);
+    });
+
+    container.appendChild(section);
+}
+
+function resetTally() {
+    if(confirm("Are you sure you want to reset all counts?")) {
+        localStorage.removeItem("tally");
+        location.reload();
+    }
+}
+
+// =====================
+// INITIALIZE PAGE
+// =====================
+
+initializeGroup("Regular Locations", regularLocations);
+initializeGroup("Juvenile Court Dept", juvenileCourt);
+initializeGroup("Superior Court Dept", superiorCourt);
+
+</script>
+
+</body>
+</html>
